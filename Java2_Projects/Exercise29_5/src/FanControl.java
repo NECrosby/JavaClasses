@@ -5,9 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class FanControl extends JPanel implements ActionListener, AdjustmentListener {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private JButton jbtStart, jbtStop, jbtReverse;
 	private JScrollBar jscb;
@@ -45,6 +43,10 @@ public class FanControl extends JPanel implements ActionListener, AdjustmentList
 			else if ("Reverse".equals(arg))
 				reverse();
 	}
+	
+	public Dimension getPreferredSize() {
+		return new Dimension(200, 200);
+	}
 
 	// Start the fan
 	public void start() {
@@ -62,10 +64,25 @@ public class FanControl extends JPanel implements ActionListener, AdjustmentList
 	}
 
 	public void adjustmentValueChanged(AdjustmentEvent e) {
-		fan.setSpeed((jscb.getMaximum() - jscb.getValue())/10);
+		//fan.setSpeed((jscb.getMaximum() - jscb.getValue())/10);
+		new Thread(new RunFanThread(e)).start();
 	}
 
-	public Dimension getPreferredSize() {
-		return new Dimension(200, 200);
+	//Runnable fanTask = new RunFan();
+	//Thread fanThread = new Thread(fanTask);
+	//fanThread.start();
+	// Task class for Running the Fan on separate Thread
+	class RunFanThread implements Runnable {
+		private AdjustmentEvent event;
+		
+		// RunFanThread Constructor
+		public RunFanThread(AdjustmentEvent event) {
+			this.event = event;
+		}
+
+		public void run() {
+
+		}
 	}
+
 }

@@ -4,9 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Exercise18_12 extends JApplet {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private FanControl fanControl1 = new FanControl();
 	private FanControl fanControl2 = new FanControl();
