@@ -18,14 +18,14 @@ public class FanControl extends JPanel implements ActionListener, AdjustmentList
 		p1.add(jbtStop = new JButton("Stop"));
 		p1.add(jbtReverse = new JButton("Reverse"));
 		p1.setBorder(new LineBorder(Color.black, 1));
-
-		JPanel p2 = new JPanel();
+				
 		setLayout(new BorderLayout());
 		add("North", p1);
 		add("Center", fan = new Fan());
-		add("South", jscb = new JScrollBar(
-				JScrollBar.HORIZONTAL, 100, 100, 0, 800));
+		jscb = new JScrollBar(JScrollBar.HORIZONTAL, 100, 100, 0, 800);
 		jscb.setMaximum(1000);
+		add("South", jscb);
+		
 
 		jbtStart.addActionListener(this);
 		jbtStop.addActionListener(this);
@@ -64,24 +64,32 @@ public class FanControl extends JPanel implements ActionListener, AdjustmentList
 	}
 
 	public void adjustmentValueChanged(AdjustmentEvent e) {
-		//fan.setSpeed((jscb.getMaximum() - jscb.getValue())/10);
-		new Thread(new RunFanThread(e)).start();
+		new Thread(new RunFanOnSeparateThread(e)).start();
 	}
 
-	//Runnable fanTask = new RunFan();
-	//Thread fanThread = new Thread(fanTask);
-	//fanThread.start();
 	// Task class for Running the Fan on separate Thread
-	class RunFanThread implements Runnable {
+	class RunFanOnSeparateThread implements Runnable {
 		private AdjustmentEvent event;
 		
 		// RunFanThread Constructor
-		public RunFanThread(AdjustmentEvent event) {
+		public RunFanOnSeparateThread(AdjustmentEvent event) {
 			this.event = event;
 		}
 
 		public void run() {
-
+			//try {
+				//Thread.sleep(1000);
+				fan.setSpeed((jscb.getMaximum() - jscb.getValue())/10);
+				
+				// Debug info
+				System.out.println("Scrollbar block increment amount: " + jscb.getBlockIncrement());
+				System.out.println("Scrollbar value selected: " + jscb.getValue());
+				System.out.println("Scrollbar max value: " + jscb.getMaximum() + " " + "Scrollbar min value: " + jscb.getMinimum());
+				System.out.println("Threads active: " + Thread.activeCount() + " " + "Current Thread: " + Thread.currentThread() + " \n");
+				
+			//} catch (InterruptedException e) {
+			//	e.printStackTrace();
+			//}
 		}
 	}
 
