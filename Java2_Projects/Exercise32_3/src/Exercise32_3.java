@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -36,14 +37,14 @@ public class Exercise32_3 extends JApplet {
 	private JPanel topPanel = new JPanel(new GridLayout(0, 2));
 	private JLabel jlblPrompt = new JLabel("Enter Hurricane Category: ");
 	JPanel bodyPanel = new JPanel(new BorderLayout());
-	JLabel jlblbHurricaneMessage = new JLabel("");
+	JLabel jlblbHurricaneMessage = new JLabel("Category not known at this time");
 
 	public static void main(String[] args) {
 		Exercise32_3 applet = new Exercise32_3();
 		JFrame frame = new JFrame();
 		frame.setTitle("Exercise 32.3: Hurricane Warnings");
 		frame.add(applet, BorderLayout.CENTER);
-		frame.setSize(500, 200);
+		frame.setSize(600, 200);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
@@ -51,12 +52,8 @@ public class Exercise32_3 extends JApplet {
 	}
 
 	public void init() {
-		setSize(new Dimension(500, 200));
-		//hurricane.setCentered(true);
-		//hurricane.setFont(new Font("Century Gothic", Font.BOLD, 20));
-		//hurricane.setMessage("");
+		setSize(new Dimension(600, 200));
 		add(hurricane);
-		//hurricane.addMouseListener(new panelMouseListener());
 	}
 
 	public Exercise32_3() {
@@ -68,33 +65,38 @@ public class Exercise32_3 extends JApplet {
 		topPanel.add(jlblPrompt);
 		topPanel.add(jtxtCategory);
 		add(topPanel, BorderLayout.NORTH);
-		String message = hurricane.setWarningMessage(getName());
+		
 		jlblbHurricaneMessage.setHorizontalAlignment(JLabel.CENTER);
 		jlblbHurricaneMessage.setVerticalAlignment(JLabel.CENTER);
-		bodyPanel.setBackground(Color.RED);
 		jlblbHurricaneMessage.setFont(new Font("Arial", Font.BOLD, 20));
-		jlblbHurricaneMessage.setForeground(Color.WHITE);
+		jlblbHurricaneMessage.setForeground(Color.BLACK);
 		bodyPanel.setBackground(Color.LIGHT_GRAY);
 		bodyPanel.add(jlblbHurricaneMessage);
-		add(bodyPanel, BorderLayout.CENTER);	
+		add(bodyPanel, BorderLayout.CENTER);
+		
 		ActionListener listener = new Listener();
 		jtxtCategory.addActionListener(listener);
-	}
-
-	private Object isWarningNeeded(int intCategory2) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	private class Listener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			try {
 				intCategory = Integer.parseInt(jtxtCategory.getText().trim());
+				while ( (intCategory > 5 || intCategory < 0) ) {
+					//JOptionPane.showMessageDialog(null, "Category cannot exceed a level 5 and must be greater than 0.");
+					jtxtCategory.setText("");
+					intCategory = (Integer) null;
+				}
+				hurricane.setCategory(intCategory);
+				if ( hurricane.isWarningNeeded() ) {
+					jlblbHurricaneMessage.setForeground(Color.WHITE);
+					bodyPanel.setBackground(Color.RED);
+				}
+				jlblbHurricaneMessage.setText(hurricane.setWarningMessage());
+			} catch (Exception ex) {
+				//ex.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Category cannot exceed a level 5 and must be greater than 0.");
 			}
-
-			hurricane.setWarningNeeded(getName());
 		}
 	}
-
-
 }
