@@ -25,6 +25,10 @@ public class DisplayTable extends JApplet {
 		frame.setVisible(true);
 	}
 	
+	public void init() {
+		setSize(640, 480);
+	}
+	
 	// Constructor
 	public DisplayTable() {
 		panel.add(new JLabel("Table Name: "));
