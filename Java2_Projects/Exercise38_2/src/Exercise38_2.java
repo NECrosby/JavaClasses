@@ -19,6 +19,7 @@ import java.awt.event.ActionListener;
 
 import javax.sql.RowSet;
 import javax.swing.*;
+
 import com.sun.rowset.JdbcRowSetImpl;
 import java.sql.*;
 
@@ -227,8 +228,7 @@ public class Exercise38_2 extends JApplet {
 		try {
 			insert();
 			jlblStatus.setText("Insertion succeeded");
-		}
-		catch (SQLException ex) {
+		} catch (SQLException ex) {
 			jlblStatus.setText(ex.getMessage());
 		}
 	}
@@ -240,8 +240,7 @@ public class Exercise38_2 extends JApplet {
 				rowSet.previous();
 				showRecord();
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			jlblStatus.setText(ex.toString());
 		}
 	}
@@ -260,12 +259,13 @@ public class Exercise38_2 extends JApplet {
 	}
 	private void jbtFirstActionPerformed(ActionEvent e) {
 		try {
+			rowSet.first();
 			if ( rowSet.first() )
 				showRecord();
 			else
 				jlblStatus.setText("There is no row in the result set");
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
+			
 			jlblStatus.setText(ex.toString());
 		}
 	}
@@ -282,10 +282,10 @@ public class Exercise38_2 extends JApplet {
 			rowSet.setConcurrency(ResultSet.CONCUR_UPDATABLE);
 			rowSet.setCommand("SELECT * FROM Address");
 			rowSet.execute();
-			rowSet.first();		
-		}
-		catch (Exception ex) {
-			jlblStatus.setText(ex.toString());
+			rowSet.next();
+					
+		} catch (SQLException | ClassNotFoundException e) {
+			e.printStackTrace();
 		}
 	}
 	private void showRecord() throws Exception {
@@ -305,15 +305,13 @@ public class Exercise38_2 extends JApplet {
 	public static void main(String[] args) {
 		Exercise38_2 applet = new Exercise38_2();
 		JFrame frame = new JFrame();
-		//EXIT_ON_CLOSE == 3
-		frame.setDefaultCloseOperation(3);
 		frame.setTitle("Exercise38_2");
 		frame.add(applet, BorderLayout.CENTER);
 		applet.init();
 		applet.start();
 		frame.pack();
-		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		frame.setLocation((d.width - frame.getSize().width) / 2, (d.height - frame.getSize().height) / 2);
+		frame.setLocationRelativeTo(null);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
 	protected void insert() throws SQLException {
