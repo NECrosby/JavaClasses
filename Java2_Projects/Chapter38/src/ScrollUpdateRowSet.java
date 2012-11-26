@@ -8,14 +8,19 @@ public class ScrollUpdateRowSet {
   public static void main(String[] args)
       throws SQLException, ClassNotFoundException {
     // Load the JDBC driver
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    System.out.println("Driver loaded");
+    //Class.forName("oracle.jdbc.driver.OracleDriver");
+    //System.out.println("Driver loaded");
 
+    Class.forName("com.mysql.jdbc.Driver");
+	System.out.println("Driver loaded");
+	
+    
     // Create a row set
     RowSet rowSet = new JdbcRowSetImpl();
 
     // Set RowSet properties
-    rowSet.setUrl("jdbc:oracle:thin:@liang.armstrong.edu:1521:orcl");
+    //rowSet.setUrl("jdbc:oracle:thin:@liang.armstrong.edu:1521:orcl");
+    rowSet.setUrl("jdbc:mysql://localhost/javabook");
     rowSet.setUsername("scott");
     rowSet.setPassword("tiger");
     rowSet.setCommand("select state, capital from StateCapital");
