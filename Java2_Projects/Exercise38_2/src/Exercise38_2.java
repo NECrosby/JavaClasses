@@ -34,8 +34,8 @@ public class Exercise38_2 extends JApplet {
 	private JButton jbtInsert = new JButton("Insert");
 	private JButton jbtDelete = new JButton("Delete");
 	private JButton jbtUpdate = new JButton("Update");
-	
-	private JTextField jtfAddressID = new JTextField(3);
+
+	private JTextField jtfAddressIDValue = new JTextField(3);	// Primary Key
 	private JTextField jtfFirstName = new JTextField(10);
 	private JTextField jtfMI = new JTextField(2);
 	private JTextField jtfLastName = new JTextField(15);
@@ -44,7 +44,7 @@ public class Exercise38_2 extends JApplet {
 	private JTextField jtfState = new JTextField(2);
 	private JTextField jtfZip = new JTextField(5);
 	private JTextField jtfTelephone = new JTextField(10);
-	private JTextField jtfEmail = new JTextField(30);		// Primary key
+	private JTextField jtfEmail = new JTextField(30);		
 
 	private JPanel jpButtons = new JPanel();
 	private JPanel jpAddressID = new JPanel();
@@ -57,9 +57,14 @@ public class Exercise38_2 extends JApplet {
 	private JPanel jpStatus = new JPanel();
 
 	private JLabel jlblStatus = new JLabel("Database: javabook; Table: Address");
+	private JLabel jlblAddressID = new JLabel("Address ID");
 
 	private RowSet rowSet = new JdbcRowSetImpl();	// Row set
 	private int currentRowNumber;		// Current row number
+	
+	// Used for get the next AddressID
+	private static RowSet tempRowSet = new JdbcRowSetImpl();
+	private static int primaryKeyValue = getLastUsedAddressID();
 
 	public static void main(String[] args) {
 		Exercise38_2 applet = new Exercise38_2();
@@ -98,12 +103,17 @@ public class Exercise38_2 extends JApplet {
 		jpButtons.add(jbtDelete);
 		jpButtons.add(jbtUpdate);
 		add(jpButtons, BorderLayout.NORTH);
-		
+
 		// AddressID Panel - Primary Key
 		jpAddressID.setLayout(new FlowLayout(FlowLayout.LEFT));
-		jpAddressID.add(new JLabel("Address ID"));
-		jpAddressID.add(jtfAddressID);
-		
+		jpAddressID.add(jlblAddressID);
+		jtfAddressIDValue.setEditable(false);
+		jtfAddressIDValue.setOpaque(true);
+		jtfAddressIDValue.setBackground(Color.WHITE);
+		jtfAddressIDValue.setForeground(Color.RED);
+		jtfAddressIDValue.setFont(new Font("sanserif", Font.BOLD, 14));
+		jpAddressID.add(jtfAddressIDValue);
+
 		// Name Panel - Row 1 in Address Panel
 		jpName.setLayout(new FlowLayout(FlowLayout.LEFT));
 		jpName.add(new JLabel("First Name"));
@@ -249,12 +259,12 @@ public class Exercise38_2 extends JApplet {
 				clearTextFields();
 				showRecord();
 				jlblStatus.setText("This is the first row");
-				System.out.println(rowSet.getRow());
+				System.out.println("The current row number is " + currentRowNumber);
 			} else {
 				rowSet.previous();
 				clearTextFields();
 				showRecord();
-				System.out.println(rowSet.getRow());
+				System.out.println("The current row number is " + currentRowNumber);
 			}
 		} catch (Exception ex) {
 			jlblStatus.setText(ex.toString());
@@ -263,14 +273,12 @@ public class Exercise38_2 extends JApplet {
 	private void jbtLastActionPerformed(ActionEvent e) {
 		try {
 			if ( !rowSet.isLast() ) {
-				//clearTextFields();
-				//showRecord();
-				rowSet.last();
 				clearTextFields();
+				rowSet.getRow();
+				rowSet.last();
 				showRecord();
 				System.out.println("The current row number is " + currentRowNumber);
 			} else {
-
 				jlblStatus.setText("This is already the LAST row");
 				System.out.println("The current row number is " + currentRowNumber);
 			}
@@ -284,9 +292,10 @@ public class Exercise38_2 extends JApplet {
 		try {
 			insert();
 			jlblStatus.setText("Insertion succeeded");
+			primaryKeyValue = getLastUsedAddressID();	// invoke to refresh the next addressID
 		} catch (Exception ex) {
-			ex.printStackTrace();
 			jlblStatus.setText(ex.getMessage());
+			ex.printStackTrace();
 		}
 	}
 	private void jbtDeleteActionPerformed(ActionEvent e) {
@@ -294,8 +303,7 @@ public class Exercise38_2 extends JApplet {
 			rowSet.deleteRow();
 			jlblStatus.setText("Deletion succeeded");
 			clearTextFields();
-			//rowCount -= 1;
-			//System.out.println("There are now " + rowCount + " rows.");
+			rowSet.moveToCurrentRow();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			jlblStatus.setText(ex.toString());
@@ -316,24 +324,50 @@ public class Exercise38_2 extends JApplet {
 	protected void insert() {
 		try {
 			// Insert a new record into the database
-			rowSet.last();
-			rowSet.moveToInsertRow();	// Move the cursor back to the position before the insertion
+			rowSet.moveToInsertRow();	
+			setPrimaryKeyValue();
 			updateRecord();				// Update the fields
-			if (jtfAddressID.getText().trim() == null) {
-				addPrimaryKeyInfo();
-			}
+			showRecord();
 			rowSet.insertRow();			// Insert the row
 			rowSet.moveToCurrentRow();	// Move the cursor back to the position before the insertion
 		} catch (SQLException ex) {
+			jlblStatus.setText("Problem inserting new record...");
 			ex.printStackTrace();
 		}
 	}
+	protected void setPrimaryKeyValue() {
+		try {
+			/* *** Need to find the last value of the AddressID at last insert, ***
+			   *** increment it, and use that as the next AddressID  			***	*/
+			rowSet.updateInt("addressID", primaryKeyValue);
+		} catch (SQLException ex) {
+			jlblStatus.setText("Problems setting AddressID, which is the Primary Key");
+			ex.printStackTrace();
+		}
+	}
+	/*	This did NOT work....
+	 * protected int getRowCount(RowSet rowSet) {
+		int primaryKeyValue = 0;
+
+		try {
+			int currentRow = rowSet.getRow();            			// Get current row  
+			primaryKeyValue = rowSet.last() ? rowSet.getRow() : 0; 	// Determine number of rows  
+			if (currentRow == 0) {									// If there was no current row
+				rowSet.beforeFirst();											  
+			} else {									  			// If there WAS a current row 
+				rowSet.absolute(currentRow);             			// Restore it    
+			}
+		} catch (SQLException ex) {
+			jlblStatus.setText("Problem getting row count...");
+			ex.printStackTrace();
+		}
+		return primaryKeyValue + 1;
+	}*/
 	// Called by the INSERT Function -- OR -- UPDATE button
 	protected void updateRecord() {
 		try {
 			// Update fields in the record
 			// Gather data from the UI and update the database fields
-			rowSet.updateString("addressID", jtfAddressID.getText().trim());
 			rowSet.updateString("firstname", jtfFirstName.getText().trim());
 			rowSet.updateString("mi", jtfMI.getText().trim());
 			rowSet.updateString("lastname", jtfLastName.getText().trim());
@@ -342,32 +376,59 @@ public class Exercise38_2 extends JApplet {
 			rowSet.updateString("state", jtfState.getText().trim());
 			rowSet.updateString("zip", jtfZip.getText().trim());
 			rowSet.updateString("telephone", jtfTelephone.getText().trim());
-			
+			rowSet.updateString("email", jtfEmail.getText().trim());
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
 	}
-	protected void addPrimaryKeyInfo() {
+	/*
+	// Called by the INSERT Function
+	protected void setPrimaryKeyValue() {
 		try {
-			if (jtfAddressID.getText().trim() == null) {
-				jtfAddressID.setText(JOptionPane.showInputDialog("AddressID address MUST be present. It is primary key"));
-				//JOptionPane.showMessageDialog(null, "Email address MUST be present. It is primary key");  // email is the PRIMARY KEY is REQUIRED
-				//jtfEmail.setText("");
-			} else {
-				rowSet.updateString("addressID", jtfAddressID.getText().trim());  // email is the PRIMARY KEY is REQUIRED
+			// If primary key value exists already prompt user to enter a new value
+			// Insert pick up on text field, SELECT * FROM Address WHERE AddressID = textfield value
+			// then rowSet.next(); then if (rowSet.peek())
+			// int primaryKeyValue = rowSet.getRow() + 1;
+			int userAddressIDValue = Integer.parseInt( jtfAddressID.getText().trim() );
+			try {
+				Class.forName("com.mysql.jdbc.Driver");
+				System.out.println("Driver loaded");
+				tempRowSet.setUrl("jdbc:mysql://localhost/javabook");
+				tempRowSet.setUsername("scott");
+				tempRowSet.setPassword("tiger");
+				tempRowSet.setCommand("SELECT * FROM Address WHERE AddressID = " + userAddressIDValue );		// " + jtfAddressID.getText().trim() + ";" 
+				tempRowSet.execute();
+				// tempRowSet.next() <-- if there is an AddressID in the table existing will return result
+				// else will not position cursor after last row for insert
+				System.out.println("The AddressID " + jtfAddressID.getText().trim() + " exists: " + tempRowSet.next());
+				if ( !tempRowSet.next() ) {
+					// IF tempRowSet does not return anything go here
+					// this will set the rowSet.getRow() to the value in AddressID
+					rowSet.updateString("addressID", jtfAddressID.getText().trim());  // email is the PRIMARY KEY is REQUIRED
+					jlblStatus.setText("Current row number: " + rowSet.getRow());
+				} else {					
+					JOptionPane.showMessageDialog(null, "AddressID exists as a primary key already");
+					rowSet.afterLast();
+					jtfAddressID.setText( Integer.toString(rowSet.getRow()) );  //primaryKeyValue);
+					rowSet.moveToInsertRow();
+					rowSet.updateString("addressID", jtfAddressID.getText().trim());  // email is the PRIMARY KEY is REQUIRED
+					System.out.println("The current row is " + rowSet.getRow());			
+					jlblStatus.setText("Current row number: " + rowSet.getRow());
+				}
+			} catch (ClassNotFoundException e) {
+				JOptionPane.showMessageDialog(null, "AddressID exists as a primary key already");
+				e.printStackTrace();
 			}
-			
 		} catch (SQLException ex) {
-			System.out.println("Email is the PRIMARY KEY & is REQUIRED.");
+			jtfAddressID.setText(JOptionPane.showInputDialog("AddressID address MUST be present. It is primary key"));
+			System.out.println("AddressID is the PRIMARY KEY & is REQUIRED.");
 			ex.printStackTrace();
 		}
 	}
+	 */
 	private void showRecord() {
 		try {
-			//rowSet.setCommand("SELECT * FROM Address");
-			//rowSet.execute();
-			//rowSet.next();
-			jtfAddressID.setText(rowSet.getString("addressID"));
+			jtfAddressIDValue.setText(rowSet.getString("addressID"));
 			jtfFirstName.setText(rowSet.getString("firstname"));
 			jtfMI.setText(rowSet.getString("mi"));
 			jtfLastName.setText(rowSet.getString("lastname"));
@@ -385,7 +446,7 @@ public class Exercise38_2 extends JApplet {
 		}
 	}
 	private void clearTextFields() {
-		jtfAddressID.setText("");
+		jtfAddressIDValue.setText("");
 		jtfFirstName.setText("");
 		jtfMI.setText("");
 		jtfLastName.setText("");
@@ -395,5 +456,23 @@ public class Exercise38_2 extends JApplet {
 		jtfZip.setText("");
 		jtfTelephone.setText("");
 		jtfEmail.setText("");
+	}
+	// Used for the STATIC AddressID Field
+	private static int getLastUsedAddressID(){
+		int value = -1;
+		// Initialize the database connection, create statement, & result set
+		try {
+			tempRowSet.setUrl("jdbc:mysql://localhost/javabook");
+			tempRowSet.setUsername("scott");
+			tempRowSet.setPassword("tiger");
+			tempRowSet.setCommand("SELECT MAX(AddressID) FROM Address");
+			tempRowSet.execute();
+			tempRowSet.next();
+			value = tempRowSet.getInt(1) + 1;
+			System.out.println("AddressID: " + value);
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+		}
+		return value;
 	}
 }

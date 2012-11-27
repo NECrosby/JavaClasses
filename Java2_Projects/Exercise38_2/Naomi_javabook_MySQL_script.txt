@@ -1,0 +1,3 @@
+
+ALTER TABLE Address ADD AddressID Int NOT NULL;
+ALTER TABLE Address ADD Primary Key (AddressID);
