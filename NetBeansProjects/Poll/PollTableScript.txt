@@ -1,0 +1,12 @@
+DROP TABLE Poll;
+SELECT * FROM Poll;
+CREATE TABLE Poll (
+	ID int NOT NULL Primary Key, 
+	question varchar(40), 
+	yesCount int, 
+	noCount int);
+INSERT INTO Poll VALUES (1, "Are you a CS major?", 0, 0);
+SELECT * FROM Poll;
+UPDATE Poll SET yesCount = yesCount + 1 WHERE ID = 1;
+UPDATE Poll SET noCount = noCount + 1 WHERE ID = 1;
+SELECT * FROM Poll;
