@@ -7,13 +7,12 @@ CREATE TABLE MultiQPoll (
 SELECT * FROM MultiQPoll;
 
 INSERT INTO MultiQPoll VALUES (1, "Do you like broccoli?", 0, 0)
-INSERT INTO MultiQPoll VALUES (2, "Do you like broccoli?", 0, 0)
+INSERT INTO MultiQPoll VALUES (2, "Do you like cheeseburgers?", 0, 0)
 INSERT INTO MultiQPoll VALUES (3, "Do you like pizza?", 0, 0);
 INSERT INTO MultiQPoll VALUES (4, "Do you like spaghetti?", 0, 0);
 INSERT INTO MultiQPoll VALUES (5, "Do you like carrots?", 0, 0);
 
-UPDATE MultiQPoll SET yesCount = yesCount + 1 WHERE ID = 1;
-UPDATE MultiQPoll SET noCount = noCount + 1 WHERE ID = 1;
+
 
 SELECT * FROM MultiQPoll;
 
