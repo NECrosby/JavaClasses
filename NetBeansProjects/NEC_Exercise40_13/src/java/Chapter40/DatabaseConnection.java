@@ -14,18 +14,11 @@ public class DatabaseConnection {
     private String password = "tiger";
     private String driver;
     private String url;
-    
-//    public void initializeJdbc() {
-//        try {
-//            System.out.println("Driver is " + driver);
-//            Class.forName(driver);
-//            connection = DriverManager.getConnection(url, username, password);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//    }
-    
-    public void initializeJdbc() {
+
+    public DatabaseConnection() {
+        initializeJdbc();
+    }
+    public static void initializeJdbc() {
         try {
             
             Class.forName("com.mysql.jdbc.Driver");
@@ -39,56 +32,6 @@ public class DatabaseConnection {
             ex.printStackTrace();
         }
     }
-    
-    public String[] getTables() {
-        String[] tables = null;
-        try {
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, null,
-                    new String[] {"TABLE"});
-            int size = 0;
-            while ( resultSet.next() ) {
-                size++;
-            }
-            
-            resultSet = metaData.getTables(null, null, null, 
-                    new String[] {"TABLE"});
-             
-            tables = new String[size];
-            int i = 0;
-            while ( resultSet.next() ) {
-                tables[i++] = resultSet.getString("TABLE_NAME");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return tables;
-    }
-    
-    public String[] getColumns() {
-        String[] columns = null;
-        try {
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, "MultiQPoll", null);
-            
-            int size = 0;
-            while ( resultSet.next() ) {
-                size++;
-            }
-            // Need to complete this method
-            resultSet = metaData.getColumns(null, null, null, "question");
-             
-            columns = new String[size];
-            int i = 0;
-            while ( resultSet.next() ) {
-                columns[i++] = resultSet.getString("COLUMN_NAME");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return columns;
-    }
-    
     public Connection getConnection() {
         return connection;
     }
@@ -116,4 +59,8 @@ public class DatabaseConnection {
     public String getUrl() {
         return url;
     }
+    
+    // Need to add in methods to get MetaData
+    
+    // Need to add in methods to get Result Sets
 }

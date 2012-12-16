@@ -18,39 +18,55 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%@page import = "Chapter40.DatabaseConnection" %>
-<jsp:useBean id="databaseConnectionID" 
-             scope="session" 
-             class="Chapter40.DatabaseConnection">
-</jsp:useBean>
 <!DOCTYPE html>
+<%-- @page import = "Chapter40.DatabaseConnection" --%>
+<jsp:useBean id="databaseConnection" class="Chapter40.DatabaseConnection" 
+             scope="session" ></jsp:useBean>
+<jsp:setProperty name="databaseConnection" property="*" />
+<jsp:useBean id="multiQPoll" class="Chapter40.MultiQuestionPoll" 
+             scope="session" ></jsp:useBean>
+<jsp:setProperty name="multiQPoll" property="*" />
+
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Exercise 40.13</title>
-        <link href="exercise4013.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="exercise4013.css" rel="stylesheet" 
+              type="text/css" media="screen" />
     </head>
     <body>
+        <%-- databaseConnection.populate(); --%>
         <div id="bodywrap">
             <h1>Exercise 40.13: Multiple Question Poll</h1>
             <h4>by Naomi Crosby</h4>
-            <% String[] questions = databaseConnectionID.getColumns();
-                if (questions == null) {%>
-            No questions found
-            <% } else {%>
+
             <form method="post" action="NEC_StatusMultiQuestionPoll.jsp">
                 Please answer the following questions:
-                    <% for (int i = 0; i < questions.length; i++) {%>
-                    <%-- print each question with 2 YES NO radio buttons --%>
-                    <p> <%-- print each question --%>
-                        <input type="radio" name="yesNo" value="true" checked="checked">Yes
-                        <input type="radio" name="yesNo" value="false">No
-                    </p>
-                <% }%>
+                <table>
+                    <% for (int x = 0; x < 5; x++) {%>
+                    <tr> 
+                        <td>
+                            <%= multiQPoll.getQuestion(x)%>
+                        </td>
+                        <td>
+                            <input type="radio" name="yesNo" value="true" checked="checked">Yes
+                        </td>
+                        <td>
+                            <input type="radio" name="yesNo" value="false">No
+                        </td>
+                        <td>
+                            <input name="<%=multiQPoll.getQuestion(x)%>">
+                        </td>
+                    </tr> 
+                    <% }%>
+                    <%-- The below 2 lines should have a method within the MultiPClass --%> 
+                    <%-- String[] questions = databaseConnection.getColumns(); --%>
+                    <%-- if (questions == null) { No questions found } else { }%> --%>
+                </table>
                 <input type="submit" name="Submit" value="Submit" />
                 <input type="reset" name="Reset" value="Reset" />
             </form>
-            <% }%>
+
         </div>
     </body>
 </html>
