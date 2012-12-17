@@ -19,13 +19,14 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
-<%-- @page import = "Chapter40.DatabaseConnection" --%>
-<jsp:useBean id="databaseConnection" class="Chapter40.DatabaseConnection" 
+<%-- if multiQPoll extends DBConnection, 
+     dbConnection Bean shouldn't have to be "used"
+<jsp:useBean id="dbConnection" class="Chapter40.DatabaseConnection" 
              scope="session" ></jsp:useBean>
-<jsp:setProperty name="databaseConnection" property="*" />
-<jsp:useBean id="multiQPoll" class="Chapter40.MultiQuestionPoll" 
-             scope="session" ></jsp:useBean>
-<jsp:setProperty name="multiQPoll" property="*" />
+<jsp:setProperty name="dbConnection" property="*" /> --%>
+<jsp:useBean id="mqPoll" class="Chapter40.MultiQuestionPoll" scope="session" >
+</jsp:useBean>
+<jsp:setProperty name="mqPoll" property="*" />
 
 <html>
     <head>
@@ -35,7 +36,7 @@
               type="text/css" media="screen" />
     </head>
     <body>
-        <%-- databaseConnection.populate(); --%>
+        <% mqPoll.populate(); %>
         <div id="bodywrap">
             <h1>Exercise 40.13: Multiple Question Poll</h1>
             <h4>by Naomi Crosby</h4>
@@ -46,7 +47,7 @@
                     <% for (int x = 0; x < 5; x++) {%>
                     <tr> 
                         <td>
-                            <%= multiQPoll.getQuestion(x)%>
+                            
                         </td>
                         <td>
                             <input type="radio" name="yesNo" value="true" checked="checked">Yes
@@ -55,7 +56,7 @@
                             <input type="radio" name="yesNo" value="false">No
                         </td>
                         <td>
-                            <input name="<%=multiQPoll.getQuestion(x)%>">
+                            <input name="<%=mqPoll.getQuestion(x)%>">
                         </td>
                     </tr> 
                     <% }%>

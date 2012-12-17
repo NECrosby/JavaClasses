@@ -3,17 +3,17 @@
  */
 package Chapter40;
 
+import com.sun.rowset.JdbcRowSetImpl;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
+import javax.sql.RowSet;
 
 public class DatabaseConnection {
-    private Connection connection = null;
+    private static Connection connection = null;
     private String username = "scott";
     private String password = "tiger";
     private String driver;
     private String url;
+    private static RowSet rowSet;
 
     public DatabaseConnection() {
         initializeJdbc();
@@ -21,12 +21,18 @@ public class DatabaseConnection {
     public static void initializeJdbc() {
         try {
             
+            // Load the JDBC driver
             Class.forName("com.mysql.jdbc.Driver");
             System.out.println("Driver loaded");
-            connection = 
-                    DriverManager.getConnection(
-                    "jdbc:mysql://localhost/javabook", "scott", "tiger");
-            System.out.println("Database connected...");
+            rowSet = new JdbcRowSetImpl();
+            rowSet.setUrl("jdbc:mysql://localhost/javabook");
+            rowSet.setUsername("scott");
+            rowSet.setPassword("tiger");
+            String sql;
+            sql = "SELECT * FROM MultiQPoll ORDER BY question";
+            rowSet.setCommand(sql);
+            rowSet.execute();
+            rowSet.next();
         
         } catch (Exception ex) {
             ex.printStackTrace();

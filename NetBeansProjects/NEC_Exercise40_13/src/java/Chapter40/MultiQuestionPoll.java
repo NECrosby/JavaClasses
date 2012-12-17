@@ -4,72 +4,56 @@
  */
 package Chapter40;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.sql.RowSet;
 
 public class MultiQuestionPoll extends DatabaseConnection {
     // Class variables
-    DatabaseConnection connection = new DatabaseConnection();
-    
+
+    private DatabaseConnection connection = new DatabaseConnection();
+    private Boolean isYes, isNo;
+    private String question;
+    private int yesCount, noCount;
+    private String responseString;
+    private RowSet rowSet;
+    private String answer;
+
     // Constructor
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public MultiQuestionPoll() {
-        populate();
-    }
-    public void populate() {
-        
-    }
-    public int getValue(int row, int column) {
-        return value;
-    }
-    public String getQuestion(int question) {
-        return value;
-    }
-    public String[] getTables() {
-        String[] tables = null;
         try {
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, null,
-                    new String[] {"TABLE"});
-            int size = 0;
-            while ( resultSet.next() ) {
-                size++;
-            }
-            
-            resultSet = metaData.getTables(null, null, null, 
-                    new String[] {"TABLE"});
-             
-            tables = new String[size];
-            int i = 0;
-            while ( resultSet.next() ) {
-                tables[i++] = resultSet.getString("TABLE_NAME");
-            }
-        } catch (Exception ex) {
+           populate(); 
+        } catch (SQLException ex) {
+            System.out.println("There is a SQL syntax error.");
             ex.printStackTrace();
         }
-        return tables;
-    }    
-    public String[] getColumns() {
-        String[] columns = null;
-        try {
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, "MultiQPoll", null);
-            
-            int size = 0;
-            while ( resultSet.next() ) {
-                size++;
+    }
+
+    public void populate() throws SQLException {
+        rowSet.last();
+        rowSet.moveToCurrentRow();
+        int questionCount = rowSet.getRow();
+        rowSet.beforeFirst();
+        while (rowSet.next()) {
+            for (int row = 1; row < questionCount; row++) {
+                question = getQuestion(row);
             }
-            // Need to complete this method
-            resultSet = metaData.getColumns(null, null, null, "question");
-             
-            columns = new String[size];
-            int i = 0;
-            while ( resultSet.next() ) {
-                columns[i++] = resultSet.getString("COLUMN_NAME");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
-        return columns;
     }
     
+    public String getQuestion(int row) throws SQLException {
+        return rowSet.getString("question");
+    }
+    public void setYesCount(int value)throws SQLException {
+        rowSet.updateInt(3, value);
+    }
+    public int getYesCount(int row) throws SQLException {
+        return rowSet.getInt("yesCount");
+    }
+    public void setNoCount(int value)throws SQLException {
+        rowSet.updateInt(4, value);
+    }
+    public int getNoCount(int row) throws SQLException {
+        return rowSet.getInt("noCount");
+    }
 }
