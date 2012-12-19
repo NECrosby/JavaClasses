@@ -4,69 +4,84 @@
 package Chapter40;
 
 import com.sun.rowset.JdbcRowSetImpl;
-import java.sql.Connection;
-import javax.sql.RowSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import javax.sql.rowset.JdbcRowSet;
 
-public class DatabaseConnection {
-    private static Connection connection = null;
-    private String username = "scott";
-    private String password = "tiger";
-    private String driver;
-    private String url;
-    private static RowSet rowSet;
+public class PollDataBean {
 
-    public DatabaseConnection() {
-        initializeJdbc();
+    private JdbcRowSet rowSet;
+    private String yesNo;
+    
+    public PollDataBean() throws ClassNotFoundException, SQLException {
+        // load the MySQL driver
+        Class.forName("com.mysql.jdbc.Driver");
+        System.out.println("Driver loaded");
+        rowSet = new JdbcRowSetImpl();
+        rowSet.setUrl("jdbc:mysql://localhost/javabook");
+        rowSet.setUsername("scott");
+        rowSet.setPassword("tiger");
+
+        String sql = "SELECT * FROM MultiQPoll ORDER BY question";
+        rowSet.setCommand(sql);
+        rowSet.execute();
     }
-    public static void initializeJdbc() {
+
+    public ArrayList<PollBean> getPollList() throws SQLException {
+        ArrayList<PollBean> pollList = new ArrayList<PollBean>();
+
+        rowSet.beforeFirst();  // Need to place cursor before first row
+
+        while (rowSet.next()) {
+            PollBean poll = new PollBean();
+            poll.setId(rowSet.getInt("ID"));                  // Column 1
+            poll.setQuestion(rowSet.getString("question"));   // Column 2
+            poll.setYesCount(rowSet.getInt("yesCount"));      // Column 3
+            poll.setNoCount(rowSet.getInt("noCount"));        // Column 4
+            
+            pollList.add(poll);
+        }
+        return pollList;
+    }
+
+    public void updateQuestion(int id, String yesNo) {
         try {
             
-            // Load the JDBC driver
-            Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("Driver loaded");
-            rowSet = new JdbcRowSetImpl();
-            rowSet.setUrl("jdbc:mysql://localhost/javabook");
-            rowSet.setUsername("scott");
-            rowSet.setPassword("tiger");
-            String sql;
-            sql = "SELECT * FROM MultiQPoll ORDER BY question";
-            rowSet.setCommand(sql);
-            rowSet.execute();
-            rowSet.next();
-        
-        } catch (Exception ex) {
+            Boolean isYes = Boolean.parseBoolean(yesNo);
+            int count = 0;
+            rowSet.absolute(id);
+            if (isYes) {
+                count = rowSet.getInt("yesCount");
+                rowSet.updateInt("yesCount", (count + 1)); // Column 3
+            } else {
+                count = rowSet.getInt("noCount");
+                rowSet.updateInt("noCount", (count + 1)); // Column 4
+            }
+            rowSet.updateRow();
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
     }
-    public Connection getConnection() {
-        return connection;
+
+    public String getYesNo() {
+        return yesNo;
     }
-    public void setUsername(String newUsername) {
-        username = newUsername;
-    }
-    public String getUsername() {
-        return username;
-    }
-    public void setPassword(String newPassword) {
-        password = newPassword;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public void setDriver(String newDriver) {
-        driver = newDriver;
-    }
-    public String getDriver() {
-        return driver;
-    }
-    public void setUrl(String newUrl) {
-        url = newUrl;
-    }
-    public String getUrl() {
-        return url;
+
+    public void setYesNo(String yesNo) {
+        this.yesNo = yesNo;
     }
     
-    // Need to add in methods to get MetaData
+//    public String setUpdateCommand(String yesNo) {
+//        String myString = "myString";
+//        Boolean isYes = false;
+//
+//        if (isYes == yesNo.contentEquals("true")) {
+//            myString = "UPDATE MultiQPoll SET yesCount = yesCount + 1";
+//        } else {
+//            myString = "UPDATE MultiQPoll SET noCount = noCount + 1";
+//        }
+//        return myString;
+//    }
     
-    // Need to add in methods to get Result Sets
 }

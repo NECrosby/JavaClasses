@@ -4,56 +4,53 @@
  */
 package Chapter40;
 
-import java.sql.SQLException;
-import javax.sql.RowSet;
+public class PollBean {
+    
+    /* ********* *\
+     *  Globals  *
+    \* ********* */
 
-public class MultiQuestionPoll extends DatabaseConnection {
-    // Class variables
-
-    private DatabaseConnection connection = new DatabaseConnection();
-    private Boolean isYes, isNo;
+    private int id;
     private String question;
-    private int yesCount, noCount;
-    private String responseString;
-    private RowSet rowSet;
-    private String answer;
-
+    private int yesCount;
+    private int noCount;
+        
     // Constructor
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public MultiQuestionPoll() {
-        try {
-           populate(); 
-        } catch (SQLException ex) {
-            System.out.println("There is a SQL syntax error.");
-            ex.printStackTrace();
-        }
+    public PollBean() {
+    
     }
 
-    public void populate() throws SQLException {
-        rowSet.last();
-        rowSet.moveToCurrentRow();
-        int questionCount = rowSet.getRow();
-        rowSet.beforeFirst();
-        while (rowSet.next()) {
-            for (int row = 1; row < questionCount; row++) {
-                question = getQuestion(row);
-            }
-        }
+    // Getter/Setters
+    public int getId() {
+        return id;
     }
     
-    public String getQuestion(int row) throws SQLException {
-        return rowSet.getString("question");
+    public void setId(int id) {
+        this.id = id;
     }
-    public void setYesCount(int value)throws SQLException {
-        rowSet.updateInt(3, value);
+
+    public String getQuestion() {
+        return question;
     }
-    public int getYesCount(int row) throws SQLException {
-        return rowSet.getInt("yesCount");
+
+    public void setQuestion(String question) {
+        this.question = question;
     }
-    public void setNoCount(int value)throws SQLException {
-        rowSet.updateInt(4, value);
+
+    public int getYesCount() {
+        return yesCount;
     }
-    public int getNoCount(int row) throws SQLException {
-        return rowSet.getInt("noCount");
+
+    public void setYesCount(int yesCount) {
+        this.yesCount = yesCount;
     }
+
+    public int getNoCount() {
+        return noCount;
+    }
+
+    public void setNoCount(int noCount) {
+        this.noCount = noCount;
+    }
+    
 }
