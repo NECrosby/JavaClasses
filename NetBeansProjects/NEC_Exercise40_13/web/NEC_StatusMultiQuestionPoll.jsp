@@ -15,51 +15,51 @@
     examples. Sort the questions in alphabetical order.
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import = "Chapter40.DatabaseConnection" %>
-<jsp:useBean id="databaseConnectionID" 
-             scope="session" 
-             class="Chapter40.DatabaseConnection">
-</jsp:useBean>
-<%@page import = "java.sql.*" %>
+<%@ page import ="java.util.ArrayList" %>
+<%@ page errorPage="NEC_error.jsp" %>
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
+<%@ page import ="java.util.*" %>
+<%@ page import ="Chapter40.PollBean" %>
+<jsp:useBean id="pollData" class="Chapter40.PollDataBean" scope="session" >
+</jsp:useBean>
+<jsp:setProperty name="pollData" property="*" />
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Exercise 40.13: Multiple Question Poll Status</title>
+        <title>Exercise 40.13: Poll Results</title>
         <link href="exercise4013.css" rel="stylesheet" type="text/css" media="screen" />
     </head>
     <body>
         <div id="bodyWrap">
-            <h1>Exercise 40.13: Multiple Question Poll</h1>
+            <h1>Exercise 40.13: Poll Results</h1>
             <h4>by Naomi Crosby</h4>
 
-            <% String tableName = request.getParameter("tablename");
-                ResultSet columns = databaseConnectionID.getConnection().getMetaData().
-                        getColumns(null, null, tableName, null);
-            %>
-            <table> <%-- border="1" --%>
-                <tr>
-                    <% // Add column names to the table
-                    while (columns.next()) {%>
-                    <td><%= columns.getString("COLUMN_NAME")%></td>
-                    <% }%>
-                </tr>
+            <table>
+                <%
+                    ArrayList<PollBean> pollList = pollData.getPollList();
+                    Iterator pollListIterator = pollList.iterator();
+                    PollBean poll;
 
-                <% Statement statement =
-                            databaseConnectionID.getConnection().createStatement();
-                    ResultSet result =
-                            statement.executeQuery("SELECT * FROM " + tableName);
-                    int columnCount = result.getMetaData().getColumnCount();
-
-                    while (result.next()) {
-                        out.println("<tr>");
-                    for (int i = 0; i < columnCount; i++) {%>
-                <td><%= result.getObject(i + 1)%></td>
-                <% }
-                 out.println("</tr>");
-             }%>
+                    while (pollListIterator.hasNext()) {
+                        poll = (PollBean) pollListIterator.next();
+                %>
+                <tr> 
+                    <td>
+                        <%= poll.getQuestion()%>&nbsp;&nbsp;
+                    </td>
+                    <td>
+                        (<%= poll.getYesCount()%>&nbsp; Yes)&nbsp;&nbsp; 
+                    </td>
+                    <td>
+                        (<%= poll.getNoCount()%>&nbsp; No)
+                    </td>
+                </tr> 
+                <% }%>
             </table>
+            <p>
+                <a href="NEC_MultiQuestionPoll.jsp" alt="Back to poll questions">Back to poll questions</a>
+            </p>
         </div>
     </body>
 </html>

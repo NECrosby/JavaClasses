@@ -16,17 +16,18 @@
     examples. Sort the questions in alphabetical order.
 
 --%>
-
+<%@page import="java.lang.System" %>
+<%@page import="java.io.PrintWriter"%>
+<%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
+<%@ page import ="java.util.ArrayList" %>
+<%@ page errorPage="NEC_error.jsp" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
-<%-- if multiQPoll extends DBConnection, 
-     dbConnection Bean shouldn't have to be "used"
-<jsp:useBean id="dbConnection" class="Chapter40.DatabaseConnection" 
-             scope="session" ></jsp:useBean>
-<jsp:setProperty name="dbConnection" property="*" /> --%>
-<jsp:useBean id="mqPoll" class="Chapter40.MultiQuestionPoll" scope="session" >
+<%@ page import ="java.util.*" %>
+<%@ page import ="Chapter40.PollBean" %>
+<jsp:useBean id="pollData" class="Chapter40.PollDataBean" scope="session" >
 </jsp:useBean>
-<jsp:setProperty name="mqPoll" property="*" />
+<jsp:setProperty name="pollData" property="*" />
 
 <html>
     <head>
@@ -36,38 +37,47 @@
               type="text/css" media="screen" />
     </head>
     <body>
-        <% mqPoll.populate(); %>
+        <jsp:setProperty name="poll" property="*" />
+        <jsp:setProperty name="pollData" property="yesNo" value="yesNo" />
+        
         <div id="bodywrap">
             <h1>Exercise 40.13: Multiple Question Poll</h1>
             <h4>by Naomi Crosby</h4>
-
             <form method="post" action="NEC_StatusMultiQuestionPoll.jsp">
-                Please answer the following questions:
+                <p>Please answer the following questions:</p>
                 <table>
-                    <% for (int x = 0; x < 5; x++) {%>
-                    <tr> 
-                        <td>
+                    <%
+                        ArrayList<PollBean> pollList = pollData.getPollList();
+                        Iterator pollListIterator = pollList.iterator();
+                        PollBean poll;
+                        String myYesNo = "true";
+                        PrintWriter debug = response.getWriter();
+                        
+                        while (pollListIterator.hasNext()) {
+                            poll = (PollBean) pollListIterator.next();
+                            out.print("<tr>");
                             
-                        </td>
-                        <td>
-                            <input type="radio" name="yesNo" value="true" checked="checked">Yes
-                        </td>
-                        <td>
-                            <input type="radio" name="yesNo" value="false">No
-                        </td>
-                        <td>
-                            <input name="<%=mqPoll.getQuestion(x)%>">
-                        </td>
-                    </tr> 
-                    <% }%>
-                    <%-- The below 2 lines should have a method within the MultiPClass --%> 
-                    <%-- String[] questions = databaseConnection.getColumns(); --%>
-                    <%-- if (questions == null) { No questions found } else { }%> --%>
+                            out.print("<td>");
+                            out.print(poll.getQuestion());
+                            out.print("&nbsp;&nbsp;</td>");
+                            
+                            out.print("<td>");
+                            out.print("<input type=\"radio\" name=\"yesNo" + poll.getId() + "\" value=\"true\" checked=\"checked\">Yes");
+                            out.print("</td>");
+                            
+                            out.print("<td>");
+                            out.print("<input type=\"radio\" name=\"yesNo" + poll.getId() + "\" value=\"false\" >No");
+                            out.print("</td>");
+
+                            out.println("</tr>");
+                            myYesNo = pollData.getYesNo();                           
+                            pollData.updateQuestion(poll.getId(), myYesNo);
+                        }
+                    %>
                 </table>
                 <input type="submit" name="Submit" value="Submit" />
                 <input type="reset" name="Reset" value="Reset" />
             </form>
-
         </div>
     </body>
 </html>
